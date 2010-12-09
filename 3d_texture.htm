@@ -76,7 +76,7 @@ var map = [
 	[1,0,0,0,0,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
 	[1,0,0,0,0,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,1,1,1,1,1],
 	[1,0,0,3,0,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-	[1,0,0,3,0,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2],
+	[1,0,0,3,0,4,0,0,0,0,0,0,2,3,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2],
 	[1,0,0,3,0,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
 	[1,0,0,3,3,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,1,1,1,1,1],
 	[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
@@ -101,7 +101,8 @@ var player = {
 	rot : 0,		// the current angle of rotation
 	speed : 0,		// is the playing moving forward (speed = 1) or backwards (speed = -1).
 	moveSpeed : 0.18,	// how far (in map units) does the player move each step/update
-	rotSpeed : 6 * Math.PI / 180	// how much does the player rotate each step/update (in radians)
+	rotSpeed : 6 * Math.PI / 180,	// how much does the player rotate each step/update (in radians)
+	strafe: 0
 }
 
 var mapWidth = 0;
@@ -176,36 +177,52 @@ function bindKeys() {
 
 		switch (e.keyCode) { // which key was pressed?
 
+			case 87: //w
 			case 38: // up, move player forward, ie. increase speed
 				player.speed = 1;
 				break;
-
+			case 83: //s
 			case 40: // down, move player backward, set negative speed
 				player.speed = -1;
 				break;
 
-			case 37: // left, rotate player left
-				player.dir = -1;
-				break;
-
-			case 39: // right, rotate player right
+			case 68: // d, rotate player left
 				player.dir = 1;
 				break;
+
+			case 65: // a, rotate player right
+				player.dir = -1;
+				break;
+				
+			case 37: //left
+				player.strafe = 1;
+				player.speed = -1;
+			break;
+			case 39: //right
+				player.strafe = 1;
+				player.speed = 1;
+			break;
 		}
 	}
 
 	document.onkeyup = function(e) {
 		e = e || window.event;
-
+		console.log(e.keyCode);
 		switch (e.keyCode) {
-			case 38:
-			case 40:
+			case 37: //left
+			case 39: //right
+			case 83: //s
+			case 87: //w
+			case 38: //up
+			case 40: //down
 				player.speed = 0;	// stop the player movement when up/down key is released
+				player.strafe = 0;
 				break;
-			case 37:
-			case 39:
+			case 65: //a
+			case 68: //d
 				player.dir = 0;
 				break;
+			
 		}
 	}
 }
@@ -409,9 +426,13 @@ function move() {
 	// make sure the angle is between 0 and 360 degrees
 	//while (player.rot < 0) player.rot += twoPI;
 	//while (player.rot >= twoPI) player.rot -= twoPI;
-
-	var newX = player.x + Math.cos(player.rot) * moveStep;	// calculate new player position with simple trigonometry
-	var newY = player.y + Math.sin(player.rot) * moveStep;
+	if(player.strafe == 0) {
+		var newX = player.x + Math.cos(player.rot) * moveStep;	// calculate new player position with simple trigonometry
+		var newY = player.y + Math.sin(player.rot) * moveStep;
+	} else {
+		var newX = player.x + Math.sin(player.rot) * moveStep;	// calculate new player position with simple trigonometry
+		var newY = player.y + Math.cos(player.rot) * moveStep;
+	}
 
 	if (isBlocking(newX, newY)) {	// are we allowed to move to the new position?
 		return; // no, bail out.
