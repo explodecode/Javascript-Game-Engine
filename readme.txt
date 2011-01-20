@@ -15,4 +15,3 @@ cupboy@gmail.com or http://blog.nihilogic.dk/
 The code examples in here are freely available under the MIT license.
 See: [http://www.opensource.org/licenses/mit-license.php]
 
-
